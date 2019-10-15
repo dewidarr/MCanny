@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffff">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_recycler"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchView">
+
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <SearchView
+            android:id="@+id/searchView"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="17dp"
+            android:padding="8dp"
+            android:background="@drawable/rounded_gray"
+            app:layout_constraintBottom_toTopOf="@+id/hospitals_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread_inside" />
+
+        <TextView
+            android:id="@+id/hospitals_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:drawableLeft="@drawable/ic_local_hospital_black_24dp"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:text="@string/Hospitals"
+            android:textColor="#000"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/phrmacy_search"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/searchView" />
+
+        <TextView
+            android:id="@+id/phrmacy_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="22dp"
+            android:drawableLeft="@drawable/ic_local_pharmacy_black_24dp"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:text="@string/Pharmacy"
+            android:textColor="#000"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/gas_search"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hospitals_search" />
+
+        <TextView
+            android:id="@+id/gas_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="22dp"
+            android:drawableLeft="@drawable/ic_local_gas_station_black_24dp"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:text="@string/Gas"
+            android:textColor="#000"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/atm_search"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/phrmacy_search" />
+
+        <TextView
+            android:id="@+id/atm_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="22dp"
+            android:drawableLeft="@drawable/ic_local_atm_black_24dp"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:text="@string/atm"
+            android:textColor="#000"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/gas_search" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

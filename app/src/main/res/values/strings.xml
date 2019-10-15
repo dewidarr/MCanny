@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MCanny</string>
+    <string name="trip_Header">Trip Help</string>
+    <string name="Hospitals">Hospitals</string>
+    <string name="Pharmacy">Pharmacy</string>
+    <string name="Gas">Gas</string>
+    <string name="atm">ATM</string>
+    <string name="please_wait">Please Wait</string>
+    <string name="cancel">Cancel</string>
+    <string name="trip_distance">Trip Distance</string>
+    <string name="trip_cost">Trip Cost</string>
+    <string name="trip_duration">Duration</string>
+</resources>
