@@ -563,7 +563,7 @@ public class OSMdroid implements SearchListener {
                          * */
 //                        setDirectionOrintation(directions);
                         geoDistanceAlgorithm.geoDistanceCheckWithRadius(currRoad.getCurrRoadLatsLng(), new LatLng(location.getLatitude(), location.getLongitude()), 35);
-                        
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
