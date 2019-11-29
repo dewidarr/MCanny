@@ -1,10 +1,10 @@
-package com.example.mcanny;
+package com.dewidar.makanny;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.example.mcanny.map.MapFragment;
+import com.dewidar.makanny.map.MapFragment;
 
 public class MainActivity extends AppCompatActivity {
 

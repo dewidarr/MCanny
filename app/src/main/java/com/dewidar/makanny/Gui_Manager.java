@@ -1,4 +1,4 @@
-package com.example.mcanny;
+package com.dewidar.makanny;
 
 import android.app.Activity;
 

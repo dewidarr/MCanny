@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -10,8 +10,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.example.mcanny.Gui_Manager;
-import com.example.mcanny.R;
+import com.dewidar.makanny.Gui_Manager;
+import com.dewidar.makanny.R;
 
 import org.osmdroid.bonuspack.location.POI;
 import org.osmdroid.bonuspack.routing.OSRMRoadManager;

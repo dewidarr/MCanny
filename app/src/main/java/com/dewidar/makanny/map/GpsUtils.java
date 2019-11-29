@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

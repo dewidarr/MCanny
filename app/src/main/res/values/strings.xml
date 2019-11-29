@@ -10,4 +10,14 @@
     <string name="trip_distance">Trip Distance</string>
     <string name="trip_cost">Trip Cost</string>
     <string name="trip_duration">Duration</string>
+    <string name="where_to_eat">Where to eat</string>
+    <string name="hotel">Hotel</string>
+    <string name="groceries">Groceries</string>
+    <string name="parking">parking</string>
+    <string name="shopping">Shopping</string>
+    <string name="try_again_later">sorry there is no place near to your location please try different one</string>
+    <string name="cinema">Cinema</string>
+    <string name="school">School and University</string>
+    <string name="cafe">Cafe</string>
+    <string name="stadium">Stadium</string>
 </resources>

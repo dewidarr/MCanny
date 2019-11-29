@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 import android.os.Handler;
 import android.util.Log;
 

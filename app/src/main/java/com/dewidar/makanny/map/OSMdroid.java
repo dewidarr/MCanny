@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 
 import android.Manifest;
 import android.app.Activity;
@@ -26,9 +26,9 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
-import com.example.mcanny.Gui_Manager;
-import com.example.mcanny.R;
-import com.example.mcanny.WaitingFragment;
+import com.dewidar.makanny.Gui_Manager;
+import com.dewidar.makanny.R;
+import com.dewidar.makanny.WaitingFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.osmdroid.api.IMapController;
@@ -56,7 +56,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.mcanny.map.DrawRouts.drawPointsFinished;
+import static com.dewidar.makanny.map.DrawRouts.drawPointsFinished;
 
 
 public class OSMdroid implements SearchListener {

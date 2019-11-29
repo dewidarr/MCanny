@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مكاني</string>
+    <string name="trip_Header">رحلة مساعدة</string>
+    <string name="Hospitals">المستشفيات</string>
+    <string name="Pharmacy">صيدلية</string>
+    <string name="Gas">محطة غاز</string>
+    <string name="atm">ماكينة الصراف الآلي</string>
+    <string name="please_wait">ارجوك انتظر</string>
+    <string name="cancel">إلغاء</string>
+    <string name="trip_distance">مسافة الرحلة</string>
+    <string name="trip_cost">تكلفة الرحلة</string>
+    <string name="trip_duration">المدة الزمنية</string>
+    <string name="where_to_eat">أماكن لتناول الطعام</string>
+    <string name="hotel">الفنادق</string>
+    <string name="groceries">محلات البقالة</string>
+    <string name="parking">موقف سيارات</string>
+    <string name="shopping">التسوق</string>
+    <string name="try_again_later">آسف ، لا يوجد مكان بالقرب من موقعك ، يرجى تجربة موقع مختلف</string>
+    <string name="cinema">سينما</string>
+    <string name="school">المدرسة والجامعة</string>
+    <string name="cafe">كافيه</string>
+    <string name="stadium">ملعب</string>
+</resources>

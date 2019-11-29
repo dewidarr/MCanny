@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,8 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.mcanny.Gui_Manager;
-import com.example.mcanny.R;
+import com.dewidar.makanny.Gui_Manager;
+import com.dewidar.makanny.R;
 
 import org.osmdroid.views.MapView;
 

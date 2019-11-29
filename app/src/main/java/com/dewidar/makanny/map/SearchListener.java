@@ -1,4 +1,4 @@
-package com.example.mcanny.map;
+package com.dewidar.makanny.map;
 
 import org.osmdroid.util.GeoPoint;
 
