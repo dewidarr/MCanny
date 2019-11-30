@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 
 import com.dewidar.makanny.Gui_Manager;
 import com.dewidar.makanny.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import org.osmdroid.views.MapView;
 
@@ -27,6 +29,7 @@ public class MapFragment extends Fragment {
     private Handler handler = new Handler();
     private OSMdroid osMdroid;
     private Context context = Gui_Manager.getInstance().getContext();
+    private AdView adView;
 
     @Nullable
     @Override
@@ -37,11 +40,15 @@ public class MapFragment extends Fragment {
         this.progressBar = view.findViewById(R.id.finding_rout);
         this.userCurrentLocation = view.findViewById(R.id.get_current_location);
         this.searchOnMap = view.findViewById(R.id.search_on_osm);
+        this.adView = view.findViewById(R.id.adView);
+
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
         osMdroid = new OSMdroid(amsMap, handler, progressBar, searchOnMap, userCurrentLocation, view);
         osMdroid.setup();
     }

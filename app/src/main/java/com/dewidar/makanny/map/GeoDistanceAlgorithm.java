@@ -11,6 +11,8 @@ public class GeoDistanceAlgorithm {
     public  int onDirection = 01;
     public  int markPos = -1;
     private boolean isLine;
+    private static boolean checkOnCorrectRoadFinished = false;
+    private int nos_calls;
     private OSMdroid osMdroid;
     private Handler handler;
 
@@ -26,43 +28,44 @@ public class GeoDistanceAlgorithm {
 
     public void geoDistanceCheckWithRadius(final List<LatLng> poly, final LatLng point, final int radius)
     {
+        // if it first time to call this method else it will wait after every call to this method to finish
+        if (nos_calls++ ==0) {
+            Log.i("dewidarCheckRoad","first time to check");
+          checkOnCorrectRoad(poly,point,radius);
+        }else if (checkOnCorrectRoadFinished){
+            Log.i("dewidarCheckRoad","another check");
+            this.checkOnCorrectRoadFinished = false;
+            checkOnCorrectRoad(poly,point,radius);
+        }else {
+            Log.i("dewidarCheckRoad","wait to check no of threads =" + Thread.activeCount());
+        }
+    }
+
+    private void checkOnCorrectRoad(final List<LatLng> poly, final LatLng point, final int radius){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 int i;
-                bdccGeo p = new bdccGeo(point.latitude,point.longitude);
+                bdccGeo p = new bdccGeo(point.latitude, point.longitude);
 
-                for(i=0; i < (poly.size()-1) ; i++)
-                {
+                for (i = 0; i < (poly.size() - 1); i++) {
                     LatLng p1 = poly.get(i);
-                    bdccGeo l1 = new bdccGeo(p1.latitude,p1.longitude);
+                    bdccGeo l1 = new bdccGeo(p1.latitude, p1.longitude);
 
-                    LatLng p2 = poly.get(i+1);
-                    bdccGeo l2 = new bdccGeo(p2.latitude,p2.longitude);
+                    LatLng p2 = poly.get(i + 1);
+                    bdccGeo l2 = new bdccGeo(p2.latitude, p2.longitude);
 
                     double distance = p.function_distanceToLineSegMtrs(l1, l2);
-//                    if (isLine) {
-                        if (distance < radius) {
-                            onTrack = 1;
-                            break;
-                        } else if (distance > radius) {
-                            onTrack = 0;
-                        }
-//                    }else {
-//                        if (distance < radius) {
-//                            poly.get(i);
-//                            markPos = i;
-//                            onDirection = 1;
-//                            break;
-//                        } else if (distance > radius) {
-//                            onDirection = 0;
-//                        }
-//                    }
-
+                    if (distance < radius) {
+                        onTrack = 1;
+                        break;
+                    } else if (distance > radius) {
+                        onTrack = 0;
+                    }
                 }
 
-                if (onTrack == 0 && osMdroid != null){
-                    Log.i("miss","the road");
+                if (onTrack == 0 && osMdroid != null) {
+                    Log.i("miss", "the road");
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -70,6 +73,12 @@ public class GeoDistanceAlgorithm {
                         }
                     });
                 }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                checkOnCorrectRoadFinished = true;
 
             }
         }).start();

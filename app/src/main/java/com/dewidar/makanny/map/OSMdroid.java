@@ -192,6 +192,8 @@ public class OSMdroid implements SearchListener {
         searchOnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 if (currentLocation != null) {
                     SearchScreen searchScreen = new SearchScreen();
                     searchScreen.setCurrentLocation(currentLocation);
@@ -209,11 +211,11 @@ public class OSMdroid implements SearchListener {
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Gui_Manager.getInstance().getFragmentManager().popBackStack();
                                     SearchScreen searchScreen = new SearchScreen();
                                     searchScreen.setCurrentLocation(curr);
                                     searchScreen.setSearchListener(OSMdroid.this);
                                     Gui_Manager.getInstance().setCurrentFragment(searchScreen);
+                                    Gui_Manager.getInstance().getFragmentManager().popBackStack();
                                 }
                             });
 
@@ -546,9 +548,7 @@ public class OSMdroid implements SearchListener {
             @Override
             public void onLocationChanged(Location location, IMyLocationProvider source) {
 
-//                Toast.makeText(context, "location changed" + location, Toast.LENGTH_SHORT).show();
                 currentLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
-//                Toast.makeText(context, "startbtn" + startBtnClicked + "  ontrack"+geoDistanceAlgorithm.onTrack, Toast.LENGTH_SHORT).show();
                 if (startBtnClicked) {
                     controller.setZoom(19.0);
                     controller.animateTo(new GeoPoint(location));
@@ -561,7 +561,6 @@ public class OSMdroid implements SearchListener {
                         /*
                          * direction enhancment with camera roll for future
                          * */
-//                        setDirectionOrintation(directions);
                         geoDistanceAlgorithm.geoDistanceCheckWithRadius(currRoad.getCurrRoadLatsLng(), new LatLng(location.getLatitude(), location.getLongitude()), 35);
 
                     } catch (Exception e) {
@@ -582,24 +581,24 @@ public class OSMdroid implements SearchListener {
     }
 
     public void reDrawCorrectRoad() {
-        if (patientPoint != null) {
-            amsMap.getOverlays().clear();
-            amsMap.invalidate();
-            setupOverlay();
-            onUserClickOnMap();
-            currRoadLatsLng.clear();
-            currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
-            try {
-                if (patientPoint != null)
-                    currRoad.drawPath(currentLocation, patientPoint, Color.GREEN, 10, progressBar);
-                if (hospitalLocation != null) {
-                    currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
-                    currRoad.drawPath(patientPoint, hospitalLocation, Color.RED, 6, progressBar);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+//        if (patientPoint != null) {
+        amsMap.getOverlays().clear();
+        amsMap.invalidate();
+        setupOverlay();
+        onUserClickOnMap();
+        currRoadLatsLng.clear();
+        currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+        try {
+            if (patientPoint != null)
+                currRoad.drawPath(currentLocation, patientPoint, Color.GREEN, 10, progressBar);
+            if (hospitalLocation != null) {
+                currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+                currRoad.drawPath(patientPoint, hospitalLocation, Color.RED, 6, progressBar);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+//        }
     }
 
     private void setDirectionOrintation(GeoDistanceAlgorithm directions) {
@@ -613,57 +612,6 @@ public class OSMdroid implements SearchListener {
             }
         }
     }
-
-/*
-    private PopupWindow popupDisplay() {
-
-        popupWindow = new PopupWindow(Gui_Manager.getInstance().getContext());
-
-        // inflate your layout or dynamically add view
-        LayoutInflater inflater = (LayoutInflater) Gui_Manager.getInstance().getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View view = inflater.inflate(R.layout.menu, null);
-        intiPopWindowViews(view);
-        setListeners();
-        popupWindow.setFocusable(true);
-        popupWindow.setWidth(500);
-        popupWindow.setHeight(400);
-        popupWindow.setContentView(view);
-        popupWindow.setClippingEnabled(true);
-
-        return popupWindow;
-    }
-*/
-
-/*
-    private void setListeners() {
-        patientHandedOver.setOnClickListener(this);
-        onPathToPatient.setOnClickListener(this);
-        arrivedToPatient.setOnClickListener(this);
-        waitingForPatient.setOnClickListener(this);
-        onTheRoadToDestination.setOnClickListener(this);
-        arriveToDestination.setOnClickListener(this);
-        waitingForHandOver.setOnClickListener(this);
-        patientRejected.setOnClickListener(this);
-        patientRelocation.setOnClickListener(this);
-        onRouteToStationBase.setOnClickListener(this);
-        end.setOnClickListener(this);
-    }
-*/
-
-/*    private void intiPopWindowViews(View view) {
-        patientHandedOver = view.findViewById(R.id.patient_handed_over);
-        onPathToPatient = view.findViewById(R.id.on_path_to_patient);
-        arrivedToPatient = view.findViewById(R.id.arrived_to_patient);
-        waitingForPatient = view.findViewById(R.id.waiting_for_patient);
-        onTheRoadToDestination = view.findViewById(R.id.on_road_to_destination);
-        arriveToDestination = view.findViewById(R.id.arrive_to_destination);
-        waitingForHandOver = view.findViewById(R.id.waiting_for_hand_over);
-        patientRejected = view.findViewById(R.id.patient_rejected);
-        patientRelocation = view.findViewById(R.id.patient_relocation);
-        onRouteToStationBase = view.findViewById(R.id.on_road_to_station_base);
-        end = view.findViewById(R.id.end);
-    }*/
 
 
     @Override
@@ -730,186 +678,6 @@ public class OSMdroid implements SearchListener {
             }
         });
     }
-
-   /* public void startTripAndCalcCost() {
-        startBtnClicked = true;
-        GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
-        mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
-        mLocationOverlay.enableMyLocation();
-        mLocationOverlay.runOnFirstFix(new Runnable() {
-            @Override
-            public void run() {
-
-                GeoPoint curr = mLocationOverlay.getMyLocation();
-                if (curr != null)
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (patientPoint != null && curr != null) {
-                                if (patientPoint != hospitalLocation) {
-                                    drawcost.getCost(curr, patientPoint, hospitalLocation, waitedTime, view);
-                                } else {
-                                    drawcost.getCost(curr, patientPoint, null, waitedTime, view);
-                                }
-                            } else if (patientPoint != null && curr == null && currentLocation != null) {
-                                if (patientPoint != hospitalLocation) {
-                                    drawcost.getCost(currentLocation, patientPoint, hospitalLocation, waitedTime, view);
-                                } else {
-                                    drawcost.getCost(currentLocation, patientPoint, null, waitedTime, view);
-                                }
-                            }
-
-                        }
-                    });
-
-            }
-        });
-        amsMap.postInvalidate();
-
-//        startTrip.setVisibility(View.GONE);
-//        waitTrip.setVisibility(View.VISIBLE);
-//        tripCost.setVisibility(View.VISIBLE);
-//        startTrip.setText("");
-//        startTrip.setText(context.getString(R.string.action));
-//        startTrip.setTextColor(Color.RED);
-//        startTrip.setBackground(context.getResources().getDrawable(R.drawable.rounded_image_black));
-//        startTrip.setVisibility(View.VISIBLE);
-    }
-*/
-  /*  @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.on_path_to_patient:
-                status = UpdateStatusEnum.ON_PATH_TO_PATIENT.getStatus();
-                break;
-
-            case R.id.arrived_to_patient:
-                status = UpdateStatusEnum.ARRIVED_TO_PATIENT.getStatus();
-                break;
-
-            case R.id.waiting_for_patient:
-                status = UpdateStatusEnum.WAITING_FOR_PATIENT.getStatus();
-                break;
-
-            case R.id.on_road_to_destination:
-                status = UpdateStatusEnum.ON_ROAD_TO_DESTINATION.getStatus();
-                break;
-
-            case R.id.arrive_to_destination:
-                status = UpdateStatusEnum.ARRIVE_TO_DESTINATION.getStatus();
-                break;
-
-            case R.id.waiting_for_hand_over:
-                status = UpdateStatusEnum.WAITING_FOR_HAND_OVER.getStatus();
-                break;
-
-            case R.id.patient_handed_over:
-                status = UpdateStatusEnum.PATIENT_HANDED_OVER.getStatus();
-                break;
-
-            case R.id.patient_rejected:
-                status = UpdateStatusEnum.PATIENT_REJECTED.getStatus();
-                break;
-
-            case R.id.patient_relocation:
-                status = UpdateStatusEnum.PATIENT_RELOCATION.getStatus();
-                break;
-
-            case R.id.on_road_to_station_base:
-                status = UpdateStatusEnum.ON_ROAD_TO_STATION_BASE.getStatus();
-                break;
-
-            case R.id.end:
-                status = UpdateStatusEnum.END.getStatus();
-                startBtnClicked = false;
-
-                if (amsMap != null) {
-                    amsMap.getOverlays().clear();
-                    amsMap.invalidate();
-                }
-                BillCost billCost = new BillCost();
-                billCost.setDistance(drawcost.getTotalDistance_duration());
-                String cost = context.getString(R.string.medicine_cost);
-                cost += "\t\t";
-                cost += BillsContainer.getInstance().getMedicinesBills() + "\n\n";
-                cost += context.getString(R.string.trip_cost) + "\t\t" + String.format("%.2f", BillsContainer.getInstance().getTripBills()) + "\n\n";
-                cost += context.getString(R.string.total_cost) + "\t\t" + String.format("%.2f", (BillsContainer.getInstance().getMedicinesBills() + BillsContainer.getInstance().getTripBills())) + "\n\n";
-                cost += context.getString(R.string.trip_distance) + "\t\t" + drawcost.getTotalDistance_duration();
-                billCost.setTripinfo(cost);
-                billCost.setCarNumber(carNumber);
-                billCost.setParamedicName(paramedicName);
-                Gui_Manager.getInstance().replaceCurrFragment(billCost);
-                break;
-        }
-
-        popupWindow.dismiss();
-        if (!status.equals("")) {
-            waitingFragment = new WaitingFragment();
-            Gui_Manager.getInstance().setCurrentFragment(waitingFragment);
-            osMdroidPresenterImp = new OSMdroidPresenterImp(this);
-            osMdroidPresenterImp.updateStatus(status);
-        }
-    }
-*/
-
-    /*@Override
-    public void responseStatus(boolean done, String desc) {
-        waitingFragment.returnBack();
-        MessagesFragment messagesFragment = new MessagesFragment();
-        if (done) {
-            messagesFragment.setMessage(desc, R.color.colorPrimaryLight, R.drawable.success);
-        } else {
-            messagesFragment.setMessage(desc, R.color.red, R.drawable.error);
-        }
-        Gui_Manager.getInstance().setCurrentFragment(messagesFragment);
-    }*/
-
-   /* private void changeBackground() {
-        if (status != null) {
-            switch (status) {
-                case "04":
-                    onPathToPatient.setBackgroundResource(R.color.gray);
-                    break;
-                case "05":
-                    arrivedToPatient.setBackgroundResource(R.color.gray);
-                    break;
-                case "06":
-                    waitingForPatient.setBackgroundResource(R.color.gray);
-                    break;
-                case "07":
-                    onTheRoadToDestination.setBackgroundResource(R.color.gray);
-                    break;
-                case "08":
-                    arriveToDestination.setBackgroundResource(R.color.gray);
-                    break;
-                case "09":
-                    waitingForHandOver.setBackgroundResource(R.color.gray);
-                    break;
-                case "0A":
-                    patientHandedOver.setBackgroundResource(R.color.gray);
-                    break;
-                case "0B":
-                    patientRejected.setBackgroundResource(R.color.gray);
-                    break;
-                case "0C":
-                    patientRelocation.setBackgroundResource(R.color.gray);
-                    break;
-                case "0D":
-                    onRouteToStationBase.setBackgroundResource(R.color.gray);
-                    break;
-                case "0E":
-                    end.setBackgroundResource(R.color.gray);
-                    break;
-
-            }
-        }
-    }
-*/
-//    public void takeAction(View view) {
-//        popupWindow = popupDisplay();
-//        popupWindow.showAsDropDown(view);
-//        changeBackground();
-//    }
 
 
 }

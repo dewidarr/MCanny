@@ -19,6 +19,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.dewidar.makanny.Gui_Manager;
 import com.dewidar.makanny.R;
 import com.dewidar.makanny.WaitingFragment;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import org.osmdroid.bonuspack.location.NominatimPOIProvider;
 import org.osmdroid.bonuspack.location.POI;
@@ -43,6 +46,8 @@ public class SearchScreen extends Fragment {
 
     private List<String> durationList;
     private List<POI> poisList;
+    private InterstitialAd mInterstitialAd;
+    private boolean firstTimeToShowADS = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -67,6 +72,34 @@ public class SearchScreen extends Fragment {
         searchView.setVisibility(View.INVISIBLE);
         this.recyclerView = view.findViewById(R.id.search_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mInterstitialAd = new InterstitialAd(Gui_Manager.getInstance().getContext());
+        mInterstitialAd.setAdUnitId("ca-app-pub-1081849494088451/4722733476");
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                // Load the next interstitial.
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            }
+
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                if (!firstTimeToShowADS) {
+                    mInterstitialAd.show();
+                    firstTimeToShowADS =true;
+                }
+            }
+        });
 
         hospitals.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,31 +208,8 @@ public class SearchScreen extends Fragment {
             }
         });
 
-       /* searchView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (searchView.getRight() - searchView.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        Toast.makeText(getActivity(), "cliked", Toast.LENGTH_SHORT).show();
-                        if (!searchView.getText().equals(""))
-                        {
-                            getSearchResults(searchView.getText().toString(),currentLocation);
-                        }
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-*/
 
         searchFilter(searchView);
-        return view;
     }
 
     public void searchForPlace(final GeoPoint regionStartPoint, final String place, final double distance) {
@@ -227,6 +237,9 @@ public class SearchScreen extends Fragment {
                                 searchAdapter.setSearchListener(searchListener);
                                 recyclerView.setAdapter(searchAdapter);
                                 Gui_Manager.getInstance().getFragmentManager().popBackStack();
+                                if (mInterstitialAd.isLoaded()) {
+                                    mInterstitialAd.show();
+                                }
                             }
                         });
                     } else {
