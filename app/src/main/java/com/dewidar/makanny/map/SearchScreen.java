@@ -262,8 +262,14 @@ public class SearchScreen extends Fragment {
                     }
 
                 }else {
-                    Toast.makeText(getContext(), getActivity().getString(R.string.try_again_later), Toast.LENGTH_LONG).show();
-                    Gui_Manager.getInstance().getFragmentManager().popBackStack();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), getActivity().getString(R.string.try_again_later), Toast.LENGTH_LONG).show();
+                            Gui_Manager.getInstance().getFragmentManager().popBackStack();
+                        }
+                    });
+
                 }
 
             }
