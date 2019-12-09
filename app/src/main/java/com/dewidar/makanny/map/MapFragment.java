@@ -2,7 +2,6 @@ package com.dewidar.makanny.map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,6 @@ public class MapFragment extends Fragment {
     private ProgressBar progressBar;
     private ImageView userCurrentLocation;
     private ImageView searchOnMap;
-    private Handler handler = new Handler();
     private OSMdroid osMdroid;
     private Context context = Gui_Manager.getInstance().getContext();
     private AdView adView;
@@ -48,8 +46,8 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-        osMdroid = new OSMdroid(amsMap, handler, progressBar, searchOnMap, userCurrentLocation, view);
+//        adView.loadAd(adRequest);
+        osMdroid = new OSMdroid(amsMap, progressBar, searchOnMap, userCurrentLocation);
         osMdroid.setup();
     }
 

@@ -11,16 +11,13 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
@@ -53,6 +50,7 @@ import org.osmdroid.views.overlay.mylocation.IMyLocationConsumer;
 import org.osmdroid.views.overlay.mylocation.IMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,7 +62,7 @@ public class OSMdroid implements SearchListener {
     private IMapController controller;
     private GeoPoint currentLocation, hospitalLocation, patientPoint;
     private DrawRouts currRoad;
-    private Handler handler;
+    private WeakReference<Handler> handler = new WeakReference<Handler>(new Handler());
     private ProgressBar progressBar;
     private ImageView searchOnMap;
     private ImageView userCurrentLocation;
@@ -74,15 +72,11 @@ public class OSMdroid implements SearchListener {
     private MyLocationNewOverlay mLocationOverlay;
     private static boolean startBtnClicked = false;
     private static List<LatLng> currRoadLatsLng = new ArrayList();
-    private String carNumber = "";
-    private String paramedicName = "";
 
+    private final static String TAG = "OSMdroid";
 
-    private CountDownTimer timer;
-    private int waitedTime = 0;
-    private String status;
-    private PopupWindow popupWindow;
-    private Context context = Gui_Manager.getInstance().getContext();
+    private WeakReference<Context> context = new WeakReference<Context>(Gui_Manager.getInstance().getContext());
+
     private String[] PERMISSIONS_LOCATION = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -90,27 +84,21 @@ public class OSMdroid implements SearchListener {
             Manifest.permission.ACCESS_COARSE_LOCATION,
     };
 
-    private TextView onPathToPatient, arrivedToPatient, waitingForPatient,
-            onTheRoadToDestination, arriveToDestination, waitingForHandOver, patientHandedOver, patientRejected,
-            patientRelocation, onRouteToStationBase, end;
-    private View view;
 
-    public OSMdroid(MapView amsmap, Handler handler, ProgressBar progressBar, ImageView searchOnMap, ImageView userCurrentLocation, View view) {
+    public OSMdroid(MapView amsmap, ProgressBar progressBar, ImageView searchOnMap, ImageView userCurrentLocation) {
         this.amsMap = amsmap;
-        this.handler = handler;
         this.progressBar = progressBar;
         this.searchOnMap = searchOnMap;
         this.userCurrentLocation = userCurrentLocation;
-        this.view = view;
     }
 
     public void setup() {
         checkPermission();
         setupOverlay();
         geoDistanceAlgorithm.setOsMdroid(this);
-        geoDistanceAlgorithm.setHandler(handler);
+        geoDistanceAlgorithm.setHandler(handler.get());
         this.controller = amsMap.getController();
-        drawcost = new DrawRouts(amsMap, context.getApplicationContext(), handler, currRoadLatsLng);
+//        drawcost = new DrawRouts(amsMap, context.get().getApplicationContext(), handler.get(), currRoadLatsLng);
 //        locationListener();
         currentLocationOnChangListener();
 
@@ -118,20 +106,22 @@ public class OSMdroid implements SearchListener {
         onUserClickOnMap();
         progressBarRout();
         // get drawn rout points to check if user on track or not
-        currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+        currRoad = new DrawRouts(amsMap, context.get(), handler.get(), currRoadLatsLng);
         initCurrentLocation();
     }
 
     public void initCurrentLocation() {
-        GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+        GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
         mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
         mLocationOverlay.enableMyLocation();
         mLocationOverlay.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
                 do {
-                    currentLocation = mLocationOverlay.getMyLocation();
-                } while (currentLocation != null);
+                    if (mLocationOverlay.getMyLocation() != null)
+                        currentLocation = mLocationOverlay.getMyLocation();
+                    Log.i(TAG, "run: init current location =" + mLocationOverlay.getMyLocation());
+                } while (mLocationOverlay.getMyLocation() == null);
             }
         });
         amsMap.postInvalidate();
@@ -140,25 +130,25 @@ public class OSMdroid implements SearchListener {
 
     private void checkPermission() {
 
-        int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int permission = ActivityCompat.checkSelfPermission(context.get(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (permission != PackageManager.PERMISSION_GRANTED) {
             makeRequestPermissions();
         }
-        Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context));
+        Configuration.getInstance().load(context.get(), PreferenceManager.getDefaultSharedPreferences(context.get()));
 
         amsMap.setTileSource(TileSourceFactory.MAPNIK);
         amsMap.setBuiltInZoomControls(true);
         amsMap.setMultiTouchControls(true);
 
-        GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+        GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
         final MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
         mLocationOverlay.enableMyLocation();
         mLocationOverlay.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
                 final GeoPoint curr = mLocationOverlay.getMyLocation();
-                handler.post(new Runnable() {
+                handler.get().post(new Runnable() {
                     @Override
                     public void run() {
                         amsMap.getController().setZoom(11.0);
@@ -178,7 +168,7 @@ public class OSMdroid implements SearchListener {
         }
 
         // check gps statue
-        new GpsUtils(context).turnGPSOn(new GpsUtils.onGpsListener() {
+        new GpsUtils(context.get()).turnGPSOn(new GpsUtils.onGpsListener() {
             @Override
             public void gpsStatus(boolean isGPSEnable) {
                 Log.i("gps", String.valueOf(isGPSEnable));
@@ -201,21 +191,22 @@ public class OSMdroid implements SearchListener {
                     Gui_Manager.getInstance().setCurrentFragment(searchScreen);
                 } else {
                     Gui_Manager.getInstance().setCurrentFragment(new WaitingFragment());
-                    GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+                    GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
                     mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
                     mLocationOverlay.enableMyLocation();
                     mLocationOverlay.runOnFirstFix(new Runnable() {
                         @Override
                         public void run() {
                             final GeoPoint curr = mLocationOverlay.getMyLocation();
-                            handler.post(new Runnable() {
+                            handler.get().post(new Runnable() {
                                 @Override
                                 public void run() {
+                                    Log.i(TAG, "run: get current location in hard way then go to search screen");
                                     SearchScreen searchScreen = new SearchScreen();
                                     searchScreen.setCurrentLocation(curr);
                                     searchScreen.setSearchListener(OSMdroid.this);
-                                    Gui_Manager.getInstance().setCurrentFragment(searchScreen);
                                     Gui_Manager.getInstance().getFragmentManager().popBackStack();
+                                    Gui_Manager.getInstance().setCurrentFragment(searchScreen);
                                 }
                             });
 
@@ -234,14 +225,14 @@ public class OSMdroid implements SearchListener {
             public void onClick(View v) {
                 userCurrentLocation.setAlpha(0.5f);
                 startBtnClicked = true;
-                GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+                GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
                 mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
                 mLocationOverlay.enableMyLocation();
                 mLocationOverlay.runOnFirstFix(new Runnable() {
                     @Override
                     public void run() {
                         final GeoPoint curr = mLocationOverlay.getMyLocation();
-                        handler.post(new Runnable() {
+                        handler.get().post(new Runnable() {
                             @Override
                             public void run() {
                                 amsMap.getController().animateTo(curr);
@@ -259,17 +250,17 @@ public class OSMdroid implements SearchListener {
 
     public void setupOverlay() {
 
-        CompassOverlay mCompassOverlay = new CompassOverlay(context, new InternalCompassOrientationProvider(context), amsMap);
+        CompassOverlay mCompassOverlay = new CompassOverlay(context.get(), new InternalCompassOrientationProvider(context.get()), amsMap);
         mCompassOverlay.enableCompass();
         amsMap.getOverlays().add(mCompassOverlay);
 
 
-        RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(context, amsMap);
+        RotationGestureOverlay mRotationGestureOverlay = new RotationGestureOverlay(context.get(), amsMap);
         mRotationGestureOverlay.setEnabled(true);
         amsMap.setMultiTouchControls(true);
         amsMap.getOverlays().add(mRotationGestureOverlay);
 
-        final DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        final DisplayMetrics dm = context.get().getResources().getDisplayMetrics();
         ScaleBarOverlay mScaleBarOverlay = new ScaleBarOverlay(amsMap);
         mScaleBarOverlay.setCentred(true);
         //play around with these values to get the location on screen in the right place for your application
@@ -284,7 +275,7 @@ public class OSMdroid implements SearchListener {
 
         int REQUEST_EXTERNAL_STORAGE = 1;
         ActivityCompat.requestPermissions(
-                (Activity) context,
+                (Activity) context.get(),
                 PERMISSIONS_LOCATION,
                 REQUEST_EXTERNAL_STORAGE
         );
@@ -309,7 +300,7 @@ public class OSMdroid implements SearchListener {
         boolean haveConnectedWifi = false;
         boolean haveConnectedMobile = false;
 
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) context.get().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo[] netInfo = cm.getAllNetworkInfo();
         for (NetworkInfo ni : netInfo) {
             if (ni.getTypeName().equalsIgnoreCase("WIFI"))
@@ -324,7 +315,7 @@ public class OSMdroid implements SearchListener {
     }
 
     private void openData() {
-        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        AlertDialog alertDialog = new AlertDialog.Builder(context.get()).create();
         alertDialog.setTitle("You Are Offline");
         alertDialog.setMessage("Please Open Your Network");
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -337,7 +328,7 @@ public class OSMdroid implements SearchListener {
     }
 
     private void onUserClickOnMap() {
-        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(context, new MapEventsReceiver() {
+        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(context.get(), new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
                 return true;
@@ -345,20 +336,20 @@ public class OSMdroid implements SearchListener {
 
             @Override
             public boolean longPressHelper(GeoPoint p) {
-                Drawable nodeIcon = context.getResources().getDrawable(R.drawable.marker_default);
+                Drawable nodeIcon = context.get().getResources().getDrawable(R.drawable.marker_default);
                 Marker nodeMarker = new Marker(amsMap);
                 nodeMarker.setIcon(nodeIcon);
                 nodeMarker.setPosition(p);
                 nodeMarker.setTitle("your destination");
                 amsMap.getOverlays().add(nodeMarker);
                 amsMap.invalidate();
-//                Toast.makeText(context, "longTab" + p, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context.get(), "longTab" + p, Toast.LENGTH_SHORT).show();
                 nodeMarker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(final Marker marker, MapView mapView) {
                         if (!marker.isInfoWindowShown()) {
 
-                            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(context.get());
                             dialog.setTitle(marker.getTitle());
                             dialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                 @Override
@@ -371,18 +362,18 @@ public class OSMdroid implements SearchListener {
                                 public void onClick(DialogInterface dialogInterface, int i) {
 
                                     patientPoint = marker.getPosition();
-                                    GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+                                    GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
                                     final MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
                                     mLocationOverlay.enableMyLocation();
                                     mLocationOverlay.runOnFirstFix(new Runnable() {
                                         @Override
                                         public void run() {
                                             final GeoPoint curr = mLocationOverlay.getMyLocation();
-                                            handler.post(new Runnable() {
+                                            handler.get().post(new Runnable() {
                                                 @Override
                                                 public void run() {
                                                     clearLastDestination();
-                                                    currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+                                                    currRoad = new DrawRouts(amsMap, context.get(), handler.get(), currRoadLatsLng);
                                                     currRoad.drawPath(curr, patientPoint, Color.GREEN, 10, progressBar);
                                                 }
                                             });
@@ -463,7 +454,7 @@ public class OSMdroid implements SearchListener {
             public void run() {
                 while (progressStatus < 100) {
                     progressStatus += 1;
-                    handler.post(new Runnable() {
+                    handler.get().post(new Runnable() {
                         public void run() {
                             progressBar.setProgress(progressStatus);
                             progressBar.getIndeterminateDrawable().setColorFilter(0xFF0000FF, android.graphics.PorterDuff.Mode.MULTIPLY);
@@ -475,46 +466,6 @@ public class OSMdroid implements SearchListener {
     }
 
 
-    /* @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-     public void drawRoutesFromFireBase(com.yelloco.ambulanceapp.models.Location patientLocation, com.yelloco.ambulanceapp.models.Location hospitallocation) {
-
-         this.patientPoint = new GeoPoint(Double.parseDouble(patientLocation.getLatitude()), Double.parseDouble(patientLocation.getLongitude()));
-         this.hospitalLocation = new GeoPoint(Double.parseDouble(hospitallocation.getLatitude()), Double.parseDouble(hospitallocation.getLongitude()));
-
-         // draw rout from current location to destination
-         GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
-         mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
-         mLocationOverlay.enableMyLocation();
-         mLocationOverlay.runOnFirstFix(new Runnable() {
-             @Override
-             public void run() {
-                 GeoPoint curr = mLocationOverlay.getMyLocation();
-                 handler.post(new Runnable() {
-                     @Override
-                     public void run() {
- //                        Toast.makeText(context, "patientLoc="+patientPoint + "hospital="+hospitalLocation + "currentloc="+ curr, Toast.LENGTH_LONG).show();
-                         if (patientPoint != null && curr != null) {
-                             currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
-                             currRoad.drawPath(curr, patientPoint, Color.GREEN, 10, progressBar);
-                         } else if (curr == null && patientPoint != null && currentLocation != null) {
-                             currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
-                             currRoad.drawPath(currentLocation, patientPoint, Color.GREEN, 10, progressBar);
-                         }
-                         if (hospitalLocation != null && patientPoint != null && !hospitalLocation.equals(patientPoint)) {
-                             currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
-                             currRoad.drawPath(patientPoint, hospitalLocation, Color.RED, 6, progressBar);
-                         }
-                     }
-                 });
-
-             }
-         });
-         amsMap.postInvalidate();
-         resetViewsOnMap();
-         startTripAndCalcCost();
-
-     }
- */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void resetViewsOnMap() {
         startBtnClicked = false;
@@ -535,12 +486,11 @@ public class OSMdroid implements SearchListener {
             return true;
         }
         return false;
-
     }
 
     private void currentLocationOnChangListener() {
         final GeoDistanceAlgorithm directions = new GeoDistanceAlgorithm(false);
-        GpsMyLocationProvider mGpsMyLocationProvider = new GpsMyLocationProvider(context);
+        GpsMyLocationProvider mGpsMyLocationProvider = new GpsMyLocationProvider(context.get());
         mGpsMyLocationProvider.setLocationUpdateMinTime(0);
         mGpsMyLocationProvider.setLocationUpdateMinDistance(0);
         mGpsMyLocationProvider.startLocationProvider(new IMyLocationConsumer() {
@@ -581,24 +531,23 @@ public class OSMdroid implements SearchListener {
     }
 
     public void reDrawCorrectRoad() {
-//        if (patientPoint != null) {
         amsMap.getOverlays().clear();
         amsMap.invalidate();
         setupOverlay();
         onUserClickOnMap();
         currRoadLatsLng.clear();
-        currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+        currRoad = new DrawRouts(amsMap, context.get(), handler.get(), currRoadLatsLng);
         try {
             if (patientPoint != null)
                 currRoad.drawPath(currentLocation, patientPoint, Color.GREEN, 10, progressBar);
             if (hospitalLocation != null) {
-                currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+                currRoad = new DrawRouts(amsMap, context.get(), handler.get(), currRoadLatsLng);
                 currRoad.drawPath(patientPoint, hospitalLocation, Color.RED, 6, progressBar);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        }
+
     }
 
     private void setDirectionOrintation(GeoDistanceAlgorithm directions) {
@@ -617,7 +566,7 @@ public class OSMdroid implements SearchListener {
     @Override
     public void callback(GeoPoint geoPoint, String desc) {
         startBtnClicked = false;
-        Drawable nodeIcon = context.getResources().getDrawable(R.drawable.marker_default);
+        Drawable nodeIcon = context.get().getResources().getDrawable(R.drawable.marker_default);
         Marker nodeMarker = new Marker(amsMap);
         nodeMarker.setIcon(nodeIcon);
         nodeMarker.setPosition(geoPoint);
@@ -633,7 +582,7 @@ public class OSMdroid implements SearchListener {
             public boolean onMarkerClick(final Marker marker, MapView mapView) {
                 if (!marker.isInfoWindowShown()) {
 
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(context.get());
                     dialog.setTitle(marker.getTitle());
                     dialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
@@ -646,19 +595,19 @@ public class OSMdroid implements SearchListener {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             clearLastDestination();
                             patientPoint = marker.getPosition();
-                            GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.getApplicationContext());
+                            GpsMyLocationProvider gpsMyLocationProvider = new GpsMyLocationProvider(context.get().getApplicationContext());
                             final MyLocationNewOverlay mLocationOverlay = new MyLocationNewOverlay(gpsMyLocationProvider, amsMap);
                             mLocationOverlay.enableMyLocation();
                             mLocationOverlay.runOnFirstFix(new Runnable() {
                                 @Override
                                 public void run() {
                                     final GeoPoint curr = mLocationOverlay.getMyLocation();
-                                    handler.post(new Runnable() {
+                                    handler.get().post(new Runnable() {
                                         @Override
                                         public void run() {
                                             clearLastDestination();
                                             currRoadLatsLng.clear();
-                                            currRoad = new DrawRouts(amsMap, context, handler, currRoadLatsLng);
+                                            currRoad = new DrawRouts(amsMap, context.get(), handler.get(), currRoadLatsLng);
                                             currRoad.drawPath(curr, patientPoint, Color.GREEN, 10, progressBar);
                                             currRoad.getCost(curr, patientPoint, null);
                                         }

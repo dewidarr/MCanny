@@ -83,7 +83,7 @@ public class SearchScreen extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+//        mInterstitialAd.loadAd(new AdRequest.Builder().build());
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
@@ -221,7 +221,7 @@ public class SearchScreen extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                NominatimPOIProvider poiProvider = new NominatimPOIProvider("OSMBonusPackTutoUserAgent");
+                NominatimPOIProvider poiProvider = new NominatimPOIProvider("mcanny");
                 poisList = poiProvider.getPOICloseTo(regionStartPoint, place, 20, distance);
                 if (poisList != null) {
                     if (poisList.size() != 0) {
